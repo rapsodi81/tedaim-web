@@ -1,0 +1,115 @@
+import { useState } from "react";
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { Bot } from "lucide-react";
+import { motion } from "framer-motion";
+
+export default function TEDAI() {
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [authenticated, setAuthenticated] = useState(false);
+  const [grades, setGrades] = useState({ matematik: "", fizik: "", kimya: "", turkce: "" });
+  const [confirmed, setConfirmed] = useState(false);
+  const [studyPlan, setStudyPlan] = useState(null);
+  const [recommendedResources, setRecommendedResources] = useState(null);
+
+  const subjectPlans = {
+    matematik: ["Her gün 1 saat problem çöz", "Konuları tekrar et", "Test çöz"],
+    fizik: ["Deney videoları izle", "Formülleri ezberle", "Pratik sorular çöz"],
+    kimya: ["Kavram haritaları oluştur", "Reaksiyonları incele", "Sorular çöz"],
+    turkce: ["Her gün paragraf sorusu çöz", "Okuma pratiği yap", "Kompozisyon yaz"]
+  };
+
+  const subjectResources = {
+    matematik: ["https://matematik.com", "https://testmatematik.org"],
+    fizik: ["https://fizikakademi.org", "https://deneylerlefizik.net"],
+    kimya: ["https://kimyaogreniyorum.com", "https://reaksiyonlar.net"],
+    turkce: ["https://turkcedersi.com", "https://paragrafteknikleri.org"]
+  };
+
+  const handleConfirmGrades = () => {
+    setConfirmed(true);
+    setStudyPlan(subjectPlans);
+    setRecommendedResources(subjectResources);
+  };
+
+  return (
+    <div className="p-6 max-w-4xl mx-auto relative">
+      {!authenticated ? (
+        <div className="p-6 max-w-sm mx-auto">
+          <h1 className="text-3xl font-bold mb-4">TEDAI Akademi Giriş</h1>
+          <Input placeholder="Kullanıcı Adı" value={username} onChange={(e) => setUsername(e.target.value)} className="mt-2" />
+          <Input placeholder="Şifre" type="password" value={password} onChange={(e) => setPassword(e.target.value)} className="mt-2" />
+          <Button onClick={() => setAuthenticated(true)} className="mt-4">Giriş Yap</Button>
+        </div>
+      ) : (
+        <>
+          <h1 className="text-3xl font-bold mb-4">TEDAI Akademi</h1>
+          <Tabs defaultValue="ogrenci">
+            <TabsList>
+              <TabsTrigger value="ogrenci">Öğrenci Paneli</TabsTrigger>
+              <TabsTrigger value="calisma">TEDAI'nin Sana Özel Çalışma Planı</TabsTrigger>
+              <TabsTrigger value="kaynaklar">TEDAI'nin Sana Özel Kaynaklar</TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="ogrenci">
+              <Card><CardContent>
+                <h2 className="text-xl font-semibold">Öğrenci Paneli</h2>
+                {Object.keys(grades).map((subject) => (
+                  <div key={subject} className="flex items-center mt-2">
+                    <span className="w-32 capitalize">{subject}</span>
+                    <Input type="number" min="0" max="100" value={grades[subject]} onChange={(e) => setGrades({ ...grades, [subject]: e.target.value })} className="ml-4" />
+                  </div>
+                ))}
+                <Button className="mt-4" onClick={handleConfirmGrades}>Notları Onayla</Button>
+                {confirmed && <p className="mt-2 text-green-600">Notlar başarıyla onaylandı!</p>}
+              </CardContent></Card>
+            </TabsContent>
+
+            <TabsContent value="calisma">
+              <Card><CardContent>
+                <h2 className="text-xl font-semibold">Kişiselleştirilmiş Çalışma Planı</h2>
+                {confirmed && studyPlan ? (
+                  Object.keys(studyPlan).map(subject => (
+                    <div key={subject} className="mb-4">
+                      <strong>{subject.toUpperCase()}</strong>
+                      <ul className="list-disc ml-6">
+                        {studyPlan[subject].map((plan, idx) => (
+                          <li key={idx}>{plan}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  ))
+                ) : (
+                  <p>Notlarını onayladıktan sonra çalışma planını görebilirsin.</p>
+                )}
+              </CardContent></Card>
+            </TabsContent>
+
+            <TabsContent value="kaynaklar">
+              <Card><CardContent>
+                <h2 className="text-xl font-semibold">Önerilen Kaynaklar</h2>
+                {confirmed && recommendedResources ? (
+                  Object.keys(recommendedResources).map(subject => (
+                    <div key={subject} className="mb-4">
+                      <strong>{subject.toUpperCase()}</strong>
+                      <ul className="list-disc ml-6">
+                        {recommendedResources[subject].map((res, idx) => (
+                          <li key={idx}><a href={res} target="_blank">{res}</a></li>
+                        ))}
+                      </ul>
+                    </div>
+                  ))
+                ) : (
+                  <p>Notlarını onayladıktan sonra kaynakları görebilirsin.</p>
+                )}
+              </CardContent></Card>
+            </TabsContent>
+          </Tabs>
+        </>
+      )}
+    </div>
+  );
+}
